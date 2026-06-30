@@ -7,19 +7,19 @@ export class Menu extends Scene {
     }
 
     create() {
-        this.add.image(512, 384, 'background');
+        this.add.image(window.innerWidth, window.innerHeight, 'background');
 
         const titleStyle = { fontFamily: 'Arial Black', fontSize: 48, color: '#ffffff', stroke: '#000000', strokeThickness: 8 };
-        this.add.text(512, 100, 'Select Level', titleStyle).setOrigin(0.5);
+        this.add.text(window.innerWidth, 100, 'Select Level', titleStyle).setOrigin(0.5);
 
         // Define the three buttons
         // 0: lines (Straight Line)
         // 1: Curve (Gentle Curve)
         // 2: shapes (Zigzag New)
 
-        this.createButton(256, 400, 'Lines', 0, this.drawStraightLine.bind(this));
-        this.createButton(512, 400, 'Curve', 1, this.drawCurve.bind(this));
-        this.createButton(768, 400, 'Shapes', 2, this.drawZigzag.bind(this));
+        this.createButton(window.innerWidth / 2 - 256, window.innerHeight / 2, 'Lines', 0, this.drawStraightLine.bind(this));
+        this.createButton(window.innerWidth / 2, window.innerHeight / 2, 'Curve', 1, this.drawCurve.bind(this));
+        this.createButton(window.innerWidth / 2 + 256, window.innerHeight / 2, 'Shapes', 2, this.drawZigzag.bind(this));
 
 
 

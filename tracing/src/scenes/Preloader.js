@@ -1,22 +1,19 @@
 import { Scene } from 'phaser';
 
-export class Preloader extends Scene
-{
-    constructor ()
-    {
+export class Preloader extends Scene {
+    constructor() {
         super('Preloader');
     }
 
-    init ()
-    {
+    init() {
         //  We loaded this image in our Boot Scene, so we can display it here
-        this.add.image(512, 384, 'preloader');
+        this.add.image(window.innerWidth, window.innerHeight, 'preloader');
 
         //  A simple progress bar. This is the outline of the bar.
-        this.add.rectangle(512, 384, 468, 32).setStrokeStyle(1, 0xffffff);
+        this.add.rectangle(window.innerWidth / 2, window.innerHeight / 2, 468, 32).setStrokeStyle(1, 0xffffff);
 
         //  This is the progress bar itself. It will increase in size from the left based on the % of progress.
-        const bar = this.add.rectangle(512-230, 384, 4, 28, 0xffffff);
+        const bar = this.add.rectangle(window.innerWidth / 2 - 230, window.innerHeight / 2, 4, 28, 0xffffff);
 
         //  Use the 'progress' event emitted by the LoaderPlugin to update the loading bar
         this.load.on('progress', (progress) => {
@@ -27,18 +24,17 @@ export class Preloader extends Scene
         });
     }
 
-    preload ()
-    {
+    preload() {
         //  Load the assets for the game - Replace with the path to your own assets
         this.load.setPath('assets');
 
         this.load.image('background', 'background.png');
         this.load.image('logo', 'cc-logo.png');
         this.load.atlas('coin', 'coin.png', 'coin.json');
+        this.load.svg('turtle', 'turtle.svg', { width: 400, height: 296 });
     }
 
-    create ()
-    {
+    create() {
         //  When all the assets have loaded, it's often worth creating global objects here that the rest of the game can use.
         //  For example, we will define our 'coin' animation here, so we can use it in other scenes:
 
