@@ -67,8 +67,8 @@ const getLevels = (w, h) => {
         { name: 'Heptagon', color: 0xec4899, path: heptagon },
         { name: 'Octagon', color: 0x06b6d4, path: octagon },
 
-        { name: 'Star 3', color: 0xffd700, path: star3 },
-        { name: 'Star 5', color: 0xff8c00, path: star5 }
+        // { name: 'Star 3', color: 0xffd700, path: star3 },
+        // { name: 'Star 5', color: 0xff8c00, path: star5 }
     ];
 };
 
@@ -103,7 +103,7 @@ export class Shapes extends Scene {
             strokeThickness: 1,
             shadow: { offsetX: 0, offsetY: 6, color: 'rgba(0, 0, 0, 0.25)', blur: 8, stroke: true, fill: true }
         };
-        this.add.text(w / 2, h * 0.1, 'HELP THE TURTLE REACH HOME!', textStyle).setOrigin(0.5);
+        this.add.text(w / 2, h * 0.1, 'Collect the stars!', textStyle).setOrigin(0.5);
 
         this.pathGraphics = this.add.graphics();
         const startPoint = level.path.getStartPoint();
@@ -113,23 +113,26 @@ export class Shapes extends Scene {
         tolerancePath.lineStyle(TOLERANCE * 2, 0x00ffff, 0.05);
         tolerancePath.strokePath(level.path);
 
-        level.path.draw(this.pathGraphics);
-        this.pathGraphics.lineStyle(Math.max(2, 4 * scale), level.color, 1);
-        this.pathGraphics.strokePath(level.path);
-
+        // Removed the solid stroke path so it only shows dots
         const maxT = level.path.getLength();
 
+        // High resolution points for accurate collision detection
         const points = level.path.getPoints(600);
         this.points = points;
         this.maxPointReached = 0;
         this.reachedEnd = false;
 
         this.pointsGraphics = this.add.graphics();
-        this.pointsGraphics.fillStyle(0xffe066, 2);
-        this.pointsGraphics.lineStyle(0, 0xffe066);
-        points.forEach(p => {
-            this.pointsGraphics.fillCircle(p.x, p.y, 3);
+        this.pointsGraphics.fillStyle(0xA9C4CF, 0.8);
+
+        // Draw visual spaced dots
+        const visualPoints = level.path.getSpacedPoints(60);
+        visualPoints.forEach(p => {
+            this.pointsGraphics.fillCircle(p.x, p.y, Math.max(3, 6 * scale));
         });
+
+        // Draw an arrow indicating direction near the start
+
 
         const home = this.add.graphics();
         home.fillStyle(0x10b981, 0.5); // Green color for home
@@ -140,6 +143,28 @@ export class Shapes extends Scene {
         this.physics.add.existing(home, true);
 
         this.add.text(w * 0.5, h * 0.95, level.name.toUpperCase(), textStyle).setOrigin(0.5).setDepth(5);
+
+        // --- STAR COUNTER & CORNERS ---
+        this.collectedStars = 0;
+        const counterStyle = { fontFamily: 'Nunito', fontSize: Math.max(20, 32 * scale), color: '#ffffff', stroke: '#000000', strokeThickness: 4 };
+        this.starCounterText = this.add.text(w * 0.95, h * 0.1, '⭐ 0', counterStyle).setOrigin(1, 0.5);
+
+        // Extract corners from the path
+        this.cornerStars = [];
+        level.path.curves.forEach((curve) => {
+            const p = curve.p0;
+            // Create a star emoji text object at this corner
+            const star = this.add.text(p.x, p.y, '⭐', { fontSize: Math.max(20, 32 * scale) })
+                .setOrigin(0.5)
+                .setDepth(10);
+
+            this.cornerStars.push({
+                object: star,
+                isCollected: false,
+                x: p.x,
+                y: p.y
+            });
+        });
 
         // --- START OF DRAWING SETUP ---
 
@@ -190,6 +215,18 @@ export class Shapes extends Scene {
                 // Prevent jumping backwards across the start/end seam of a closed shape
                 if (closestIndex - this.maxPointReached < this.points.length * 0.5) {
                     this.maxPointReached = closestIndex;
+                } else {
+                    // User traced backwards across the seam (counter-clockwise from start)
+                    this.isTracing = false;
+                    this.drawGraphics.clear();
+                    return;
+                }
+            } else if (closestIndex < this.maxPointReached) {
+                // User traced backwards along the path
+                if (this.maxPointReached - closestIndex > 20) {
+                    this.isTracing = false;
+                    this.drawGraphics.clear();
+                    return;
                 }
             }
 
@@ -198,6 +235,41 @@ export class Shapes extends Scene {
             if (minDistance <= TOLERANCE) {
                 this.goodFrames++;
             }
+
+            // Check for star collection
+            this.cornerStars.forEach(starData => {
+                if (!starData.isCollected) {
+                    const distToStar = Phaser.Math.Distance.Between(pointer.x, pointer.y, starData.x, starData.y);
+                    if (distToStar < TOLERANCE * 3) {
+                        starData.isCollected = true;
+
+                        // Tween the star to the counter
+                        this.tweens.add({
+                            targets: starData.object,
+                            x: this.starCounterText.x - 30, // Approximate center of counter text
+                            y: this.starCounterText.y,
+                            scaleX: 1.5,
+                            scaleY: 1.5,
+                            duration: 600,
+                            ease: 'Cubic.easeIn',
+                            onComplete: () => {
+                                starData.object.destroy();
+                                this.collectedStars++;
+                                this.starCounterText.setText('⭐ ' + this.collectedStars);
+
+                                // Optional: pulse the counter
+                                this.tweens.add({
+                                    targets: this.starCounterText,
+                                    scaleX: 1.2,
+                                    scaleY: 1.2,
+                                    duration: 100,
+                                    yoyo: true
+                                });
+                            }
+                        });
+                    }
+                }
+            });
 
             const canComplete = !this.isClosedShape || this.maxPointReached > this.points.length * 0.8;
 
