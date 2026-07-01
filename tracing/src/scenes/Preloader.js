@@ -6,8 +6,15 @@ export class Preloader extends Scene {
     }
 
     init() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+
+        const bg = this.add.image(w * 0.5, h * 0.5, 'preloader');
+        const scale = Math.min(w / bg.width, h / bg.height);
+        bg.setScale(scale);
         //  We loaded this image in our Boot Scene, so we can display it here
-        this.add.image(window.innerWidth, window.innerHeight, 'preloader');
+
 
         //  A simple progress bar. This is the outline of the bar.
         this.add.rectangle(window.innerWidth / 2, window.innerHeight / 2, 468, 32).setStrokeStyle(1, 0xffffff);

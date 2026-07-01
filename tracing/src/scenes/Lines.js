@@ -17,21 +17,22 @@ const getLevels = (w, h) => {
     const diagonalLineLeftUp = new Phaser.Curves.Path(w * 0.1, h * 0.85);
     diagonalLineLeftUp.lineTo(w * 0.9, h * 0.15);
 
-    const twoLines = new Phaser.Curves.Path(w * 0.1, h * 0.65);
-    twoLines.lineTo(w * 0.45, h * 0.3);
-    twoLines.quadraticBezierTo(w * 0.5, h * 0.2, w * 0.55, h * 0.3);
-    twoLines.lineTo(w * 0.9, h * 0.65);
+
+    const twoLines = new Phaser.Curves.Path(w * 0.1, h * 0.75);  // bottom-left
+    twoLines.lineTo(w * 0.48, h * 0.2);                           // stop before peak
+    twoLines.lineTo(w * 0.9, h * 0.75);                           // bottom-right                      // bottom-right                       // bottom-right
 
     const multipleLines = new Phaser.Curves.Path(w * 0.1, h * 0.5);
     multipleLines.lineTo(w * 0.25, h * 0.25);
-    multipleLines.quadraticBezierTo(w * 0.3, h * 0.15, w * 0.35, h * 0.25);
+
     multipleLines.lineTo(w * 0.45, h * 0.75);
-    multipleLines.quadraticBezierTo(w * 0.5, h * 0.85, w * 0.55, h * 0.75);
+
     multipleLines.lineTo(w * 0.65, h * 0.25);
-    multipleLines.quadraticBezierTo(w * 0.7, h * 0.15, w * 0.75, h * 0.25);
+
     multipleLines.lineTo(w * 0.9, h * 0.5);
 
     return [
+        //ingle Line
         { name: 'Diagonal Line Right Down', color: 0x4f8ef7, path: diagonalLineRightDown },
         { name: 'Diagonal Line Left Up', color: 0x4f8ef7, path: diagonalLineLeftUp },
         { name: 'Single Line', color: 0x4f8ef7, path: singleLine },
@@ -189,6 +190,8 @@ export class Lines extends Scene {
                 this.totalFrames = 0;
                 this.goodFrames = 0;
                 this.reachedEnd = false;
+                this.maxPointReached = 0;
+                this.isClosedShape = Phaser.Math.Distance.Between(startPoint.x, startPoint.y, endPoint.x, endPoint.y) < 10;
             }
         });
 
@@ -205,13 +208,19 @@ export class Lines extends Scene {
 
             // Calculate accuracy: Find how far the pointer is from the closest point on the guide path
             let minDistance = Number.MAX_VALUE;
+            let closestIndex = 0;
             for (let i = 0; i < this.points.length; i++) {
                 const p = this.points[i];
                 // Calculate distance between current pointer and this specific point on the path
                 const d = Phaser.Math.Distance.Between(pointer.x, pointer.y, p.x, p.y);
                 if (d < minDistance) {
                     minDistance = d; // Keep track of the smallest distance found
+                    closestIndex = i;
                 }
+            }
+
+            if (closestIndex > (this.maxPointReached || 0)) {
+                this.maxPointReached = closestIndex;
             }
 
             this.totalFrames++; // Increment total tracked movements
@@ -222,7 +231,10 @@ export class Lines extends Scene {
             }
 
             // Check if the user has reached the end point (within double the tolerance distance)
-            if (Phaser.Math.Distance.Between(pointer.x, pointer.y, endPoint.x, endPoint.y) < TOLERANCE) {
+            // For closed shapes, ensure they have traced at least 80% of the path to prevent instant completion
+            const canComplete = !this.isClosedShape || this.maxPointReached > this.points.length * 0.8;
+
+            if (canComplete && Phaser.Math.Distance.Between(pointer.x, pointer.y, endPoint.x, endPoint.y) < TOLERANCE) {
                 this.reachedEnd = true; // Mark as successfully reached
                 this.finishLevel(); // Trigger the end level logic
             }

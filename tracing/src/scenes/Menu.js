@@ -7,26 +7,32 @@ export class Menu extends Scene {
     }
 
     create() {
-        this.add.image(window.innerWidth, window.innerHeight, 'background');
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+
+        const bg = this.add.image(w * 0.5, h * 0.5, 'background');
+        const scale = Math.min(w / bg.width, h / bg.height);
+        bg.setScale(scale);
 
         const titleStyle = { fontFamily: 'Arial Black', fontSize: 48, color: '#ffffff', stroke: '#000000', strokeThickness: 8 };
-        this.add.text(window.innerWidth, 100, 'Select Level', titleStyle).setOrigin(0.5);
+        this.add.text(window.innerWidth / 2, 100, 'Select Level', titleStyle).setOrigin(0.5);
 
         // Define the three buttons
         // 0: lines (Straight Line)
         // 1: Curve (Gentle Curve)
         // 2: shapes (Zigzag New)
 
-        this.createButton(window.innerWidth / 2 - 256, window.innerHeight / 2, 'Lines', 0, this.drawStraightLine.bind(this));
-        this.createButton(window.innerWidth / 2, window.innerHeight / 2, 'Curve', 1, this.drawCurve.bind(this));
-        this.createButton(window.innerWidth / 2 + 256, window.innerHeight / 2, 'Shapes', 2, this.drawZigzag.bind(this));
+        this.createButton(window.innerWidth / 2 - 256, window.innerHeight / 2, 'Lines', 0, this.drawStraightLine.bind(this), 'Lines');
+        this.createButton(window.innerWidth / 2, window.innerHeight / 2, 'Curve', 1, this.drawCurve.bind(this), 'Lines');
+        this.createButton(window.innerWidth / 2 + 256, window.innerHeight / 2, 'Shapes', 0, this.drawZigzag.bind(this), 'Shapes');
 
 
 
 
     }
 
-    createButton(x, y, text, levelIndex, drawShapeFn) {
+    createButton(x, y, text, levelIndex, drawShapeFn, targetScene = 'Lines') {
         const container = this.add.container(x, y);
 
         // 3D Transparent Button Design (Glassmorphism / Beveled)
@@ -116,7 +122,7 @@ export class Menu extends Scene {
                 duration: 50,
                 yoyo: true,
                 onComplete: () => {
-                    this.scene.start('Lines', { levelIndex: levelIndex });
+                    this.scene.start(targetScene, { levelIndex: levelIndex });
                 }
             });
         });
