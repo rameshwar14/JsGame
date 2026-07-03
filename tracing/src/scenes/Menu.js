@@ -12,7 +12,7 @@ export class Menu extends Scene {
 
 
         const bg = this.add.image(w * 0.5, h * 0.5, 'background');
-        const scale = Math.min(w / bg.width, h / bg.height);
+        const scale = Math.max(w / bg.width, h / bg.height);
         bg.setScale(scale);
 
         const titleStyle = { fontFamily: 'Arial Black', fontSize: 48, color: '#ffffff', stroke: '#000000', strokeThickness: 8 };

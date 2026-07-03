@@ -2,34 +2,37 @@ import { Scene } from 'phaser';
 import * as Phaser from 'phaser';
 
 const getLevels = (w, h) => {
-    const singleLine = new Phaser.Curves.Path(w * 0.1, h * 0.5);
-    singleLine.lineTo(w * 0.9, h * 0.5);
+    const minX = w * 0.25;
+    const maxX = w * 0.75;
+    const minY = h * 0.30;
+    const maxY = h * 0.80;
+    const midX = w * 0.5;
+    const midY = (minY + maxY) / 2;
 
-    const verticalLine = new Phaser.Curves.Path(w * 0.5, h * 0.15);
-    verticalLine.lineTo(w * 0.5, h * 0.85);
+    const singleLine = new Phaser.Curves.Path(minX, midY);
+    singleLine.lineTo(maxX, midY);
 
-    const diagonalLineLeftDown = new Phaser.Curves.Path(w * 0.1, h * 0.15);
-    diagonalLineLeftDown.lineTo(w * 0.9, h * 0.85);
+    const verticalLine = new Phaser.Curves.Path(midX, minY);
+    verticalLine.lineTo(midX, maxY);
 
-    const diagonalLineRightDown = new Phaser.Curves.Path(w * 0.9, h * 0.15);
-    diagonalLineRightDown.lineTo(w * 0.1, h * 0.85);
+    const diagonalLineLeftDown = new Phaser.Curves.Path(minX, minY);
+    diagonalLineLeftDown.lineTo(maxX, maxY);
 
-    const diagonalLineLeftUp = new Phaser.Curves.Path(w * 0.1, h * 0.85);
-    diagonalLineLeftUp.lineTo(w * 0.9, h * 0.15);
+    const diagonalLineRightDown = new Phaser.Curves.Path(maxX, minY);
+    diagonalLineRightDown.lineTo(minX, maxY);
 
+    const diagonalLineLeftUp = new Phaser.Curves.Path(minX, maxY);
+    diagonalLineLeftUp.lineTo(maxX, minY);
 
-    const twoLines = new Phaser.Curves.Path(w * 0.1, h * 0.75);  // bottom-left
-    twoLines.lineTo(w * 0.48, h * 0.2);                           // stop before peak
-    twoLines.lineTo(w * 0.9, h * 0.75);                           // bottom-right                      // bottom-right                       // bottom-right
+    const twoLines = new Phaser.Curves.Path(minX, maxY);
+    twoLines.lineTo(midX, minY + (h * 0.05));
+    twoLines.lineTo(maxX, maxY);
 
-    const multipleLines = new Phaser.Curves.Path(w * 0.1, h * 0.5);
-    multipleLines.lineTo(w * 0.25, h * 0.25);
-
-    multipleLines.lineTo(w * 0.45, h * 0.75);
-
-    multipleLines.lineTo(w * 0.65, h * 0.25);
-
-    multipleLines.lineTo(w * 0.9, h * 0.5);
+    const multipleLines = new Phaser.Curves.Path(minX, midY);
+    multipleLines.lineTo(w * 0.25, minY);
+    multipleLines.lineTo(w * 0.45, maxY);
+    multipleLines.lineTo(w * 0.65, minY);
+    multipleLines.lineTo(maxX, midY);
 
     return [
         //ingle Line
@@ -50,6 +53,7 @@ export class Lines extends Scene {
 
     init(data) {
         this.levelIndex = data.levelIndex || 0;
+        this.score = data.score || 0;
     }
 
     create() {
@@ -64,6 +68,17 @@ export class Lines extends Scene {
         // Change the background color to match the UI (light blue)
         this.cameras.main.setBackgroundColor('#badff2');
 
+        // Draw the play area border
+        const borderGraphics = this.add.graphics();
+        borderGraphics.lineStyle(6 * scale, 0xffffff, 1);
+        borderGraphics.fillStyle(0xffffff, 0.2);
+
+        // The play area sits below the top UI
+        const playAreaY = h * 0.12;
+        const playAreaHeight = h * 0.84;
+        borderGraphics.fillRoundedRect(w * 0.1, playAreaY, w * 0.8, playAreaHeight, 20 * scale);
+        borderGraphics.strokeRoundedRect(w * 0.1, playAreaY, w * 0.8, playAreaHeight, 20 * scale);
+
         const level = LEVELS[this.levelIndex];
 
         const textStyle = {
@@ -74,7 +89,8 @@ export class Lines extends Scene {
             strokeThickness: 1,
             shadow: { offsetX: 0, offsetY: 6, color: 'rgba(0, 0, 0, 0.25)', blur: 8, stroke: true, fill: true }
         };
-        this.add.text(w / 2, h * 0.1, 'HELP THE TURTLE REACH HOME!', textStyle).setOrigin(0.5);
+        // Position title outside the play area at the top
+        this.add.text(w / 2, h * 0.06, 'HELP THE TURTLE REACH HOME!', textStyle).setOrigin(0.5);
 
         // Draw the guide path with a golden style and soft outer glow
         this.guideGraphics = this.add.graphics();
@@ -107,11 +123,11 @@ export class Lines extends Scene {
 
         // Draw START platform (Green)
         // 1. Outermost Oval (Largest)
-        this.guideGraphics.fillStyle(0x56b02a, 1); // Dark green outer
+        this.guideGraphics.fillStyle(0x56b02a, 0.3); // Dark green outer
         this.guideGraphics.fillEllipse(startPoint.x, startPoint.y, 120 * scale, 80 * scale);
 
         // 2. Middle Oval (Nested inside the outer one)
-        this.guideGraphics.fillStyle(0x8df65a, 1); // Bright green middle
+        this.guideGraphics.fillStyle(0x56b02a, 0.6); // Bright green middle
         this.guideGraphics.fillEllipse(startPoint.x, startPoint.y, 90 * scale, 60 * scale);
 
         // 3. Innermost Oval (Smallest, nested inside the middle one)
@@ -132,30 +148,48 @@ export class Lines extends Scene {
 
         // Draw END platform (Red)
 
+        // --- CLOSE BUTTON ---
+        const closeBtnStyle = { fontFamily: 'Nunito', fontSize: Math.max(24, 38 * scale), color: '#ffffff', stroke: '#000000', strokeThickness: 4, shadow: { offsetX: 0, offsetY: 4, color: 'rgba(0, 0, 0, 0.25)', blur: 4, stroke: true, fill: true } };
+        const closeBtn = this.add.text(w * 0.05, h * 0.06, '✖', closeBtnStyle)
+            .setOrigin(0.5)
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                this.scene.start('Menu');
+            });
+
+        // --- SCORE UI ---
+        const scoreContainer = this.add.container(w * 0.90, h * 0.06);
+        const scoreIcon = this.add.image(0, 0, 'shell').setScale(0.6 * scale);
+        const scoreStyle = { fontFamily: 'Nunito', fontSize: Math.max(20, 32 * scale), color: '#ffffff', stroke: '#2e6b12', strokeThickness: 4, shadow: { offsetX: 0, offsetY: 4, color: 'rgba(0, 0, 0, 0.25)', blur: 4, stroke: true, fill: true } };
+        const scoreText = this.add.text(35 * scale, 0, this.score.toString(), scoreStyle).setOrigin(0, 0.5);
+        this.scoreText = scoreText;
+        scoreContainer.add([scoreIcon, scoreText]);
 
 
-        this.guideGraphics.fillStyle(0xd93838, 1); // Dark green outer
+        this.guideGraphics.fillStyle(0xffffff, 0.3); // Dark green outer
         this.guideGraphics.fillEllipse(endPoint.x, endPoint.y, 120 * scale, 80 * scale);
 
         // 2. Middle Oval (Nested inside the outer one)
-        this.guideGraphics.fillStyle(0xff8888, 1); // Bright green middle
+        this.guideGraphics.fillStyle(0xffffff, 0.5); // Bright green middle
         this.guideGraphics.fillEllipse(endPoint.x, endPoint.y, 90 * scale, 60 * scale);
 
         // 3. Innermost Oval (Smallest, nested inside the middle one)
-        this.guideGraphics.fillStyle(0xd93838, 1); // Dark green center
+        this.guideGraphics.fillStyle(0xffffff, 1); // Dark green center
         this.guideGraphics.fillEllipse(endPoint.x, endPoint.y, 60 * scale, 40 * scale);
 
         // END Text
-        this.add.text(endPoint.x, endPoint.y + (70 * scale), 'END', { fontFamily: 'Nunito', fontSize: Math.max(12, 24 * scale), color: '#8b0000' }).setOrigin(0.5);
+        this.add.text(endPoint.x, endPoint.y + (70 * scale), 'Home', { fontFamily: 'Nunito', fontSize: Math.max(12, 24 * scale), color: '#8b0000' }).setOrigin(0.5);
+        const homeIcon = this.add.image(endPoint.x, endPoint.y - (15 * scale), 'home').setScale(0.5 * scale).setOrigin(0.5);
         // Star Emoji with continuous rotation
-        const starIcon = this.add.text(endPoint.x, endPoint.y - (10 * scale), '⭐', { fontSize: `${Math.max(16, 36 * scale)}px` }).setOrigin(0.5);
-        this.tweens.add({
-            targets: starIcon,
-            angle: 360, // Rotate a full 360 degrees
-            duration: 3000, // Takes 3 seconds for one full spin
-            repeat: -1, // Repeat infinitely
-            ease: 'Linear' // Smooth continuous speed
-        });
+        // const starIcon = this.add.text(endPoint.x, endPoint.y - (10 * scale), '⭐', { fontSize: `${Math.max(16, 36 * scale)}px` }).setOrigin(0.5);
+        // this.tweens.add({
+        //     targets: homeIcon,
+        //     y: endPoint.y - (30 * scale), // Bounce up
+        //     duration: 1200,
+        //     yoyo: true,
+        //     repeat: -1,
+        //     ease: 'Sine.easeInOut'
+        // });
 
         // --- START OF DRAWING SETUP ---
 
@@ -265,14 +299,28 @@ export class Lines extends Scene {
         }
 
         let stars = 1;
+        let earnedLettuce = 2;
         if (accuracy >= 0.85) {
             stars = 3;
+            earnedLettuce = 10;
         } else if (accuracy >= 0.60) {
             stars = 2;
+            earnedLettuce = 5;
+        }
+
+        this.score += earnedLettuce;
+        if (this.scoreText) {
+            this.scoreText.setText(this.score.toString());
         }
 
         this.time.delayedCall(1000, () => {
-            this.scene.start('GameOver', { stars: stars, levelIndex: this.levelIndex, maxLevels: this.LEVELS.length, sceneName: 'Lines' });
+            this.scene.start('GameOver', {
+                stars: stars,
+                levelIndex: this.levelIndex,
+                maxLevels: this.LEVELS.length,
+                sceneName: 'Lines',
+                score: this.score
+            });
         });
     }
 }

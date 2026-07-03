@@ -149,6 +149,15 @@ export class Shapes extends Scene {
         const counterStyle = { fontFamily: 'Nunito', fontSize: Math.max(20, 32 * scale), color: '#ffffff', stroke: '#000000', strokeThickness: 4 };
         this.starCounterText = this.add.text(w * 0.95, h * 0.1, '⭐ 0', counterStyle).setOrigin(1, 0.5);
 
+        // --- CLOSE BUTTON ---
+        const closeBtnStyle = { fontFamily: 'Nunito', fontSize: Math.max(24, 38 * scale), color: '#ffffff', stroke: '#000000', strokeThickness: 4, shadow: { offsetX: 0, offsetY: 4, color: 'rgba(0, 0, 0, 0.25)', blur: 4, stroke: true, fill: true } };
+        const closeBtn = this.add.text(w * 0.05, h * 0.1, '✖', closeBtnStyle)
+            .setOrigin(0.5)
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                this.scene.start('Menu');
+            });
+
         // Extract corners from the path
         this.cornerStars = [];
         level.path.curves.forEach((curve) => {

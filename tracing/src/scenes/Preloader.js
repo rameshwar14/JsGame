@@ -35,10 +35,15 @@ export class Preloader extends Scene {
         //  Load the assets for the game - Replace with the path to your own assets
         this.load.setPath('assets');
 
-        this.load.image('background', 'background.png');
+        this.load.image('background', 'start_scene.png');
+
+        this.load.image('start_name', 'tracing_name.png');
         this.load.image('logo', 'cc-logo.png');
         this.load.atlas('coin', 'coin.png', 'coin.json');
         this.load.svg('turtle', 'turtle.svg', { width: 400, height: 296 });
+        this.load.image('home', 'home.png', { width: 400, height: 296 });
+        this.load.image('lettuce', 'lettuce.png');
+        this.load.image('shell', 'shell.png');
     }
 
     create() {

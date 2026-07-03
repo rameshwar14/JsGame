@@ -10,6 +10,7 @@ export class GameOver extends Scene {
         this.levelIndex = data.levelIndex || 0;
         this.maxLevels = data.maxLevels || 1;
         this.sceneName = data.sceneName || 'Lines';
+        this.score = data.score || 0;
     }
 
     create() {
@@ -36,7 +37,7 @@ export class GameOver extends Scene {
             if (isComplete) {
                 this.scene.start('MainMenu');
             } else {
-                this.scene.start(this.sceneName, { levelIndex: nextLevelIndex });
+                this.scene.start(this.sceneName, { levelIndex: nextLevelIndex, score: this.score });
             }
 
         });
