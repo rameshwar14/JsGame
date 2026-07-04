@@ -28,6 +28,9 @@ const getLevels = (w, h) => {
     twoLines.lineTo(midX, minY + (h * 0.05));
     twoLines.lineTo(maxX, maxY);
 
+    const curveLine = new Phaser.Curves.Path(minX, midY);
+    curveLine.quadraticBezierTo(maxX, midY, midX, minY - (h * 0.1));
+
     const multipleLines = new Phaser.Curves.Path(minX, midY);
     multipleLines.lineTo(w * 0.25, minY);
     multipleLines.lineTo(w * 0.45, maxY);
@@ -42,6 +45,7 @@ const getLevels = (w, h) => {
         { name: 'Vertical Line', color: 0x4f8ef7, path: verticalLine },
         { name: 'Diagonal Line Left Down', color: 0x4f8ef7, path: diagonalLineLeftDown },
         { name: 'Two Lines', color: 0xa78bfa, path: twoLines },
+        { name: 'Curve Line', color: 0xec4899, path: curveLine },
         { name: 'Multiple Lines', color: 0xf59e0b, path: multipleLines }
     ];
 };

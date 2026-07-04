@@ -103,7 +103,7 @@ export class Shapes extends Scene {
             strokeThickness: 1,
             shadow: { offsetX: 0, offsetY: 6, color: 'rgba(0, 0, 0, 0.25)', blur: 8, stroke: true, fill: true }
         };
-        this.add.text(w / 2, h * 0.1, 'Collect the stars!', textStyle).setOrigin(0.5);
+        this.add.text(w / 2, h * 0.1, 'Collect the lettuce!', textStyle).setOrigin(0.5);
 
         this.pathGraphics = this.add.graphics();
         const startPoint = level.path.getStartPoint();
@@ -147,7 +147,8 @@ export class Shapes extends Scene {
         // --- STAR COUNTER & CORNERS ---
         this.collectedStars = 0;
         const counterStyle = { fontFamily: 'Nunito', fontSize: Math.max(20, 32 * scale), color: '#ffffff', stroke: '#000000', strokeThickness: 4 };
-        this.starCounterText = this.add.text(w * 0.95, h * 0.1, '⭐ 0', counterStyle).setOrigin(1, 0.5);
+        this.starCounterText = this.add.text(w * 0.95, h * 0.1, '0', counterStyle).setOrigin(1, 0.5);
+        this.starCounterIcon = this.add.image(w * 0.95 - (30 * scale), h * 0.1, 'lettuce').setScale(0.5 * scale).setOrigin(1, 0.5);
 
         // --- CLOSE BUTTON ---
         const closeBtnStyle = { fontFamily: 'Nunito', fontSize: Math.max(24, 38 * scale), color: '#ffffff', stroke: '#000000', strokeThickness: 4, shadow: { offsetX: 0, offsetY: 4, color: 'rgba(0, 0, 0, 0.25)', blur: 4, stroke: true, fill: true } };
@@ -162,10 +163,8 @@ export class Shapes extends Scene {
         this.cornerStars = [];
         level.path.curves.forEach((curve) => {
             const p = curve.p0;
-            // Create a star emoji text object at this corner
-            const star = this.add.text(p.x, p.y, '⭐', { fontSize: Math.max(20, 32 * scale) })
-                .setOrigin(0.5)
-                .setDepth(10);
+            // Create a lettuce image at this corner
+            const star = this.add.image(p.x, p.y, 'lettuce').setScale(0.5 * scale).setOrigin(0.5).setDepth(10);
 
             this.cornerStars.push({
                 object: star,
@@ -264,7 +263,7 @@ export class Shapes extends Scene {
                             onComplete: () => {
                                 starData.object.destroy();
                                 this.collectedStars++;
-                                this.starCounterText.setText('⭐ ' + this.collectedStars);
+                                this.starCounterText.setText(this.collectedStars.toString());
 
                                 // Optional: pulse the counter
                                 this.tweens.add({
