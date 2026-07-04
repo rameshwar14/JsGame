@@ -28,8 +28,6 @@ const getLevels = (w, h) => {
     twoLines.lineTo(midX, minY + (h * 0.05));
     twoLines.lineTo(maxX, maxY);
 
-    const curveLine = new Phaser.Curves.Path(minX, midY);
-    curveLine.quadraticBezierTo(maxX, midY, midX, minY - (h * 0.1));
 
     const multipleLines = new Phaser.Curves.Path(minX, midY);
     multipleLines.lineTo(w * 0.25, minY);
@@ -37,6 +35,50 @@ const getLevels = (w, h) => {
     multipleLines.lineTo(w * 0.65, minY);
     multipleLines.lineTo(maxX, midY);
 
+
+    const curveLine = new Phaser.Curves.Path(minX, midY);
+    curveLine.quadraticBezierTo(maxX, midY, midX, minY - (h * 0.1));
+
+    const curve1 = new Phaser.Curves.Path(minX, midY);
+    curve1.quadraticBezierTo(
+        maxX,
+        midY,
+        midX,
+        minY - (h * 0.25)
+    );
+    const curve2 = new Phaser.Curves.Path(minX, midY);
+    curve2.quadraticBezierTo(
+        maxX,
+        midY,
+        midX,
+        maxY + (h * 0.25)
+    );
+    const curve4 = new Phaser.Curves.Path(minX, midY);
+    curve4.quadraticBezierTo(
+        maxX,
+        midY,
+        minX + (w * 0.25),
+        minY - (h * 0.2)
+    );
+    const curve5 = new Phaser.Curves.Path(minX, midY);
+    curve5.quadraticBezierTo(
+        maxX,
+        midY,
+        maxX - (w * 0.25),
+        minY - (h * 0.2)
+    );
+    const sCurve = new Phaser.Curves.Path(minX, midY);
+    sCurve.cubicBezierTo(
+        minX + (w * 0.3), minY,
+        maxX - (w * 0.3), maxY,
+        maxX, midY
+    );
+    const reverseSCurve = new Phaser.Curves.Path(minX, midY);
+    reverseSCurve.cubicBezierTo(
+        minX + (w * 0.3), maxY,
+        maxX - (w * 0.3), minY,
+        maxX, midY
+    );
     return [
         //ingle Line
         { name: 'Diagonal Line Right Down', color: 0x4f8ef7, path: diagonalLineRightDown },
@@ -45,8 +87,16 @@ const getLevels = (w, h) => {
         { name: 'Vertical Line', color: 0x4f8ef7, path: verticalLine },
         { name: 'Diagonal Line Left Down', color: 0x4f8ef7, path: diagonalLineLeftDown },
         { name: 'Two Lines', color: 0xa78bfa, path: twoLines },
+
+        { name: 'Multiple Lines', color: 0xf59e0b, path: multipleLines },
+
         { name: 'Curve Line', color: 0xec4899, path: curveLine },
-        { name: 'Multiple Lines', color: 0xf59e0b, path: multipleLines }
+        { name: 'Curve 1', color: 0xec4899, path: curve1 },
+        { name: 'Curve 2', color: 0xec4899, path: curve2 },
+        { name: 'Curve 4', color: 0xec4899, path: curve4 },
+        { name: 'Curve 5', color: 0xec4899, path: curve5 },
+        { name: 'S Curve', color: 0xec4899, path: sCurve },
+        { name: 'Reverse S Curve', color: 0xec4899, path: reverseSCurve }
     ];
 };
 

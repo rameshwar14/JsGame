@@ -24,7 +24,7 @@ export class Menu extends Scene {
         // 2: shapes (Zigzag New)
 
         this.createButton(window.innerWidth / 2 - 256, window.innerHeight / 2, 'Lines', 0, this.drawStraightLine.bind(this), 'Lines');
-        this.createButton(window.innerWidth / 2, window.innerHeight / 2, 'Curve', 1, this.drawCurve.bind(this), 'Lines');
+        this.createButton(window.innerWidth / 2, window.innerHeight / 2, 'Curve', 7, this.drawCurve.bind(this), 'Lines');
         this.createButton(window.innerWidth / 2 + 256, window.innerHeight / 2, 'Shapes', 0, this.drawZigzag.bind(this), 'Shapes');
 
 
