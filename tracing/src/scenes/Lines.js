@@ -363,17 +363,16 @@ export class Lines extends Scene {
         }
 
         this.score += earnedLettuce;
-        if (this.scoreText) {
-            this.scoreText.setText(this.score.toString());
-        }
-
+        // Score UI is intentionally not updated here so the old score remains visible until the next level
+        
         this.time.delayedCall(1000, () => {
             this.scene.start('GameOver', {
                 stars: stars,
                 levelIndex: this.levelIndex,
                 maxLevels: this.LEVELS.length,
                 sceneName: 'Lines',
-                score: this.score
+                score: this.score,
+                earnedScore: earnedLettuce
             });
         });
     }

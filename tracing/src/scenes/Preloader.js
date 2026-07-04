@@ -44,6 +44,7 @@ export class Preloader extends Scene {
         this.load.image('home', 'home.png', { width: 400, height: 296 });
         this.load.image('lettuce', 'lettuce.png');
         this.load.image('shell', 'shell.png');
+        this.load.atlas('turtle_anim', 'texture.png', 'texture.json');
     }
 
     create() {
@@ -61,6 +62,18 @@ export class Preloader extends Scene {
             key: 'vanish',
             frames: this.anims.generateFrameNames('coin', { prefix: 'vanish_', start: 1, end: 4 }),
             frameRate: 10
+        });
+
+        this.anims.create({
+            key: 'turtle_dance',
+            frames: [
+                { key: 'turtle_anim', frame: 'turtle_3' },
+                { key: 'turtle_anim', frame: 'turtle_5' },
+                { key: 'turtle_anim', frame: 'turtle_6' },
+                { key: 'turtle_anim', frame: 'turtle_7' }
+            ],
+            frameRate: 6,
+            repeat: -1
         });
 
         //  When all the assets are loaded go to the next scene.

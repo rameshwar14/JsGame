@@ -16,13 +16,18 @@ export class Menu extends Scene {
         bg.setScale(scale);
 
         const titleStyle = { fontFamily: 'Arial Black', fontSize: 48, color: '#ffffff', stroke: '#000000', strokeThickness: 8 };
-        this.add.text(window.innerWidth / 2, 100, 'Select Level', titleStyle).setOrigin(0.5);
+        this.add.text(window.innerWidth / 2, 250, 'Select Level', titleStyle).setOrigin(0.5);
 
         // Define the three buttons
         // 0: lines (Straight Line)
         // 1: Curve (Gentle Curve)
         // 2: shapes (Zigzag New)
-
+        const backBtn = this.add.text(w * 0.05, h * 0.06, 'Back', titleStyle)
+            .setOrigin(0.2)
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                this.scene.start('MainMenu');
+            });
         this.createButton(window.innerWidth / 2 - 256, window.innerHeight / 2, 'Lines', 0, this.drawStraightLine.bind(this), 'Lines');
         this.createButton(window.innerWidth / 2, window.innerHeight / 2, 'Curve', 7, this.drawCurve.bind(this), 'Lines');
         this.createButton(window.innerWidth / 2 + 256, window.innerHeight / 2, 'Shapes', 0, this.drawZigzag.bind(this), 'Shapes');
