@@ -7,38 +7,39 @@ export class Menu extends Scene {
     }
 
     create() {
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-
+        const { width: w, height: h } = this.scale;
+        const scale = Math.min(w / 1024, h / 768);
 
         const bg = this.add.image(w * 0.5, h * 0.5, 'background');
-        const scale = Math.max(w / bg.width, h / bg.height);
-        bg.setScale(scale);
+        const bgScale = Math.max(w / bg.width, h / bg.height);
+        bg.setScale(bgScale);
 
-        const titleStyle = { fontFamily: 'Arial Black', fontSize: 48, color: '#ffffff', stroke: '#000000', strokeThickness: 8 };
-        this.add.text(window.innerWidth / 2, 250, 'Select Level', titleStyle).setOrigin(0.5);
+        const titleStyle = { fontFamily: 'Arial Black', fontSize: `${48 * scale}px`, color: '#ffffff', stroke: '#000000', strokeThickness: 8 * scale };
+        this.add.text(w / 2, h * 0.15, 'Select Level', titleStyle).setOrigin(0.5);
 
-        // Define the three buttons
-        // 0: lines (Straight Line)
-        // 1: Curve (Gentle Curve)
-        // 2: shapes (Zigzag New)
         const backBtn = this.add.text(w * 0.05, h * 0.06, 'Back', titleStyle)
             .setOrigin(0.2)
             .setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
                 this.scene.start('MainMenu');
             });
-        this.createButton(window.innerWidth / 2 - 256, window.innerHeight / 2, 'Lines', 0, this.drawStraightLine.bind(this), 'Lines');
-        this.createButton(window.innerWidth / 2, window.innerHeight / 2, 'Curve', 7, this.drawCurve.bind(this), 'Lines');
-        this.createButton(window.innerWidth / 2 + 256, window.innerHeight / 2, 'Shapes', 0, this.drawZigzag.bind(this), 'Shapes');
 
-
-
-
+        const isPortrait = h > w;
+        
+        if (isPortrait) {
+            this.createButton(w / 2, h / 2 - (260 * scale), 'Lines', 0, this.drawStraightLine.bind(this), 'Lines', scale);
+            this.createButton(w / 2, h / 2, 'Curve', 7, this.drawCurve.bind(this), 'Lines', scale);
+            this.createButton(w / 2, h / 2 + (260 * scale), 'Shapes', 0, this.drawZigzag.bind(this), 'Shapes', scale);
+        } else {
+            this.createButton(w / 2 - (256 * scale), h / 2, 'Lines', 0, this.drawStraightLine.bind(this), 'Lines', scale);
+            this.createButton(w / 2, h / 2, 'Curve', 7, this.drawCurve.bind(this), 'Lines', scale);
+            this.createButton(w / 2 + (256 * scale), h / 2, 'Shapes', 0, this.drawZigzag.bind(this), 'Shapes', scale);
+        }
     }
 
-    createButton(x, y, text, levelIndex, drawShapeFn, targetScene = 'Lines') {
+    createButton(x, y, text, levelIndex, drawShapeFn, targetCategory, scale) {
         const container = this.add.container(x, y);
+        container.setScale(scale);
 
         // 3D Transparent Button Design (Glassmorphism / Beveled)
         const bg = this.add.graphics();
@@ -71,7 +72,7 @@ export class Menu extends Scene {
         container.add(shapeGraphics);
 
         // Text
-        const textStyle = { fontFamily: 'Arial Black', fontSize: 28, color: '#ffffff', stroke: '#000000', strokeThickness: 4 };
+        const textStyle = { fontFamily: 'Arial Black', fontSize: '28px', color: '#ffffff', stroke: '#000000', strokeThickness: 4 };
         const label = this.add.text(0, 70, text, textStyle).setOrigin(0.5);
         container.add(label);
 
@@ -83,8 +84,8 @@ export class Menu extends Scene {
         zone.on('pointerover', () => {
             this.tweens.add({
                 targets: container,
-                scaleX: 1.05,
-                scaleY: 1.05,
+                scaleX: scale * 1.05,
+                scaleY: scale * 1.05,
                 duration: 100
             });
             bg.clear();
@@ -100,8 +101,8 @@ export class Menu extends Scene {
         zone.on('pointerout', () => {
             this.tweens.add({
                 targets: container,
-                scaleX: 1,
-                scaleY: 1,
+                scaleX: scale,
+                scaleY: scale,
                 duration: 100
             });
             bg.clear();
@@ -122,12 +123,12 @@ export class Menu extends Scene {
         zone.on('pointerdown', () => {
             this.tweens.add({
                 targets: container,
-                scaleX: 0.95,
-                scaleY: 0.95,
+                scaleX: scale * 0.95,
+                scaleY: scale * 0.95,
                 duration: 50,
                 yoyo: true,
                 onComplete: () => {
-                    this.scene.start(targetScene, { levelIndex: levelIndex });
+                    this.scene.start('GameScene', { category: targetCategory, levelIndex: levelIndex });
                 }
             });
         });

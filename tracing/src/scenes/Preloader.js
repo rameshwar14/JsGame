@@ -6,28 +6,21 @@ export class Preloader extends Scene {
     }
 
     init() {
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-
+        const { width: w, height: h } = this.scale;
+        const scale = Math.min(w / 1024, h / 768);
 
         const bg = this.add.image(w * 0.5, h * 0.5, 'preloader');
-        const scale = Math.min(w / bg.width, h / bg.height);
-        bg.setScale(scale);
-        //  We loaded this image in our Boot Scene, so we can display it here
+        const bgScale = Math.max(w / bg.width, h / bg.height);
+        bg.setScale(bgScale);
 
+        const barWidth = 468 * scale;
+        const barHeight = 32 * scale;
 
-        //  A simple progress bar. This is the outline of the bar.
-        this.add.rectangle(window.innerWidth / 2, window.innerHeight / 2, 468, 32).setStrokeStyle(1, 0xffffff);
+        this.add.rectangle(w / 2, h / 2, barWidth, barHeight).setStrokeStyle(2, 0xffffff);
+        const bar = this.add.rectangle(w / 2 - (barWidth / 2) + (4 * scale), h / 2, 4 * scale, barHeight - (8 * scale), 0xffffff);
 
-        //  This is the progress bar itself. It will increase in size from the left based on the % of progress.
-        const bar = this.add.rectangle(window.innerWidth / 2 - 230, window.innerHeight / 2, 4, 28, 0xffffff);
-
-        //  Use the 'progress' event emitted by the LoaderPlugin to update the loading bar
         this.load.on('progress', (progress) => {
-
-            //  Update the progress bar (our bar is 464px wide, so 100% = 464px)
-            bar.width = 4 + (460 * progress);
-
+            bar.width = (4 * scale) + ((barWidth - (12 * scale)) * progress);
         });
     }
 

@@ -6,18 +6,19 @@ export class MainMenu extends Scene {
     }
 
     create() {
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-        const textStyle = { fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff', stroke: '#000000', strokeThickness: 8 };
+        const { width: w, height: h } = this.scale;
+        const scale = Math.min(w / 1024, h / 768);
 
         const bg = this.add.image(w * 0.5, h * 0.5, 'background');
-        const scale = Math.max(w / bg.width, h / bg.height);
-        bg.setScale(scale);
-        const logo = this.add.image(w / 2, h / 2 - 270, 'start_name');
+        const bgScale = Math.max(w / bg.width, h / bg.height);
+        bg.setScale(bgScale);
+        
+        const logo = this.add.image(w / 2, -200, 'start_name');
+        logo.setScale(scale);
 
         this.tweens.add({
             targets: logo,
-            y: 270,
+            y: h * 0.3,
             duration: 1000,
             ease: 'Bounce'
         });
@@ -26,14 +27,15 @@ export class MainMenu extends Scene {
             'Trace the glowing path!',
         ];
 
-        this.add.text(window.innerWidth / 2, window.innerHeight / 2 + 150, instructions, textStyle).setAlign('center').setOrigin(0.5);
+        const textStyle = { fontFamily: 'Arial Black', fontSize: `${38 * scale}px`, color: '#ffffff', stroke: '#000000', strokeThickness: 8 * scale };
+        this.add.text(w / 2, h * 0.6, instructions, textStyle).setAlign('center').setOrigin(0.5);
 
-        this.createStartButton(window.innerWidth / 2, window.innerHeight / 2 + 300, 'PLAY');
-
+        this.createStartButton(w / 2, h * 0.8, 'PLAY', scale);
     }
 
-    createStartButton(x, y, text) {
+    createStartButton(x, y, text, scale) {
         const container = this.add.container(x, y);
+        container.setScale(scale);
 
         const bg = this.add.graphics();
 
@@ -69,7 +71,7 @@ export class MainMenu extends Scene {
         container.add(bg);
 
         // Text
-        const textStyle = { fontFamily: 'Arial Black', fontSize: 48, color: '#ffffff', stroke: '#478f14', strokeThickness: 10 };
+        const textStyle = { fontFamily: 'Arial Black', fontSize: '48px', color: '#ffffff', stroke: '#478f14', strokeThickness: 10 };
         const label = this.add.text(0, -5, text, textStyle).setOrigin(0.5);
         container.add(label);
 
@@ -80,8 +82,8 @@ export class MainMenu extends Scene {
         zone.on('pointerover', () => {
             this.tweens.add({
                 targets: container,
-                scaleX: 1.05,
-                scaleY: 1.05,
+                scaleX: scale * 1.05,
+                scaleY: scale * 1.05,
                 duration: 100
             });
             drawButton(true);
@@ -90,18 +92,36 @@ export class MainMenu extends Scene {
         zone.on('pointerout', () => {
             this.tweens.add({
                 targets: container,
-                scaleX: 1,
-                scaleY: 1,
+                scaleX: scale,
+                scaleY: scale,
                 duration: 100
             });
             drawButton(false);
         });
 
         zone.on('pointerdown', () => {
+            if (!this.scale.isFullscreen) {
+                this.scale.startFullscreen();
+            }
+            try {
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape').catch((e) => console.warn(e));
+                } else if (screen.lockOrientation) {
+                    screen.lockOrientation('landscape');
+                } else if (screen.mozLockOrientation) {
+                    screen.mozLockOrientation('landscape');
+                } else if (screen.msLockOrientation) {
+                    screen.msLockOrientation('landscape');
+                }
+            } catch (e) {
+                console.warn('Orientation lock failed', e);
+            }
+            this.scale.lockOrientation('landscape');
+
             this.tweens.add({
                 targets: container,
-                scaleX: 0.95,
-                scaleY: 0.95,
+                scaleX: scale * 0.95,
+                scaleY: scale * 0.95,
                 duration: 50,
                 yoyo: true,
                 onComplete: () => {
